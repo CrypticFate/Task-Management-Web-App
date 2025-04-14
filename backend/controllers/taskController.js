@@ -5,20 +5,25 @@ const Task = require('../models/Task');
 // @access Private
 const getTasks = async (req, res) => {
   try {
+    console.log('GET /api/tasks request received');
+    console.log('User ID from request:', req.user.id);
+    
     const tasks = await Task.find({ user: req.user.id });
+    console.log('Tasks found:', tasks.length);
+    
     res.status(200).json(tasks);
   } catch (error) {
-    console.error(error);
+    console.error('Error in getTasks controller:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// @desc   Create task
-// @route  POST /api/tasks
-// @access Private
+// @desc    Create a new task
+// @route   POST /api/tasks
+// @access  Private
 const createTask = async (req, res) => {
   try {
-    const { title, description, dueDate, priority, category } = req.body;
+    const { title, description, dueDate, priority } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: 'Please add a title' });
@@ -30,13 +35,12 @@ const createTask = async (req, res) => {
       description,
       dueDate,
       priority,
-      category,
     });
 
     res.status(201).json(task);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server Error' });
   }
 };
 

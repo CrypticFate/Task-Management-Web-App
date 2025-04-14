@@ -16,6 +16,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Simple test endpoint that doesn't require authentication
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working' });
+});
+
+// Test endpoint for tasks that doesn't require authentication
+app.get('/api/test-tasks', (req, res) => {
+  res.json([
+    { _id: 'test1', title: 'Test Task 1', description: 'This is a test task', priority: 'medium' },
+    { _id: 'test2', title: 'Test Task 2', description: 'This is another test task', priority: 'high' }
+  ]);
+});
+
 // Routes
 app.use('/api/users', require('./routes/authRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));

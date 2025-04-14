@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import { getTasks, createTask, updateTask, deleteTask } from '../utils/api';
+import { getTasks, createTask, updateTask, deleteTask, testApi, testTasksApi } from '../utils/api';
 import TaskForm from '../components/Tasks/TaskForm';
 import TaskItem from '../components/Tasks/TaskItem';
 import './Dashboard.css';
@@ -12,6 +12,7 @@ function Dashboard() {
   const [error, setError] = useState('');
   const [editingTask, setEditingTask] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [testTasksData, setTestTasksData] = useState(null);
 
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -22,17 +23,42 @@ function Dashboard() {
       return;
     }
 
+    // Test basic API connectivity first
+    const runTests = async () => {
+      try {
+        // Test the API without authentication
+        await testApi();
+        console.log('Basic API test successful');
+        
+        // Test tasks endpoint without authentication
+        const testData = await testTasksApi();
+        setTestTasksData(testData);
+        console.log('Test tasks API successful');
+      } catch (error) {
+        console.error('API test failed:', error);
+        setError('API test failed: ' + (error.message || 'Unknown error'));
+      }
+    };
+    
+    runTests();
     fetchTasks();
   }, [user, navigate]);
 
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
+      console.log('Attempting to fetch tasks with user:', user?.name);
       const data = await getTasks();
       setTasks(data);
+      setError(''); // Clear any previous errors
     } catch (error) {
-      setError('Failed to fetch tasks');
-      console.error(error);
+      setError('Failed to fetch tasks: ' + (error.message || 'Unknown error'));
+      console.error('Error details:', error);
+      // If we got test tasks, use them to show something
+      if (testTasksData) {
+        console.log('Using test tasks data instead');
+        setTasks(testTasksData);
+      }
     } finally {
       setIsLoading(false);
     }
